@@ -1,0 +1,66 @@
+#!/usr/bin/env Rscript
+
+library(argparser)
+library(stringr)
+
+# Def Args ----
+
+p <- arg_parser("Set operations on text files, one element per line.")
+
+p <- p |>
+  add_argument("--files",
+    short = "-f",
+    nargs = Inf,
+    help = "Input files."
+  ) |>
+  add_argument("--diff",
+    short = "-d", flag = TRUE,
+    help = "Difference."
+  ) |>
+  add_argument("--symd",
+    short = "-s", flag = TRUE,
+    help = "Symmetric difference."
+  ) |>
+  add_argument("--union",
+    short = "-u", flag = TRUE,
+    help = "Union."
+  ) |>
+  add_argument("--inter",
+    short = "-i", flag = TRUE,
+    help = "Intersection."
+  )
+
+
+argl <- parse_args(p)
+ops <- c("diff", "symd", "union", "inter")
+selected <- argl[ops] |>
+  unlist() |>
+  which()
+
+# Check Args ----s
+
+error  <- function(mssg) {
+  mssg <- str_flatten(mssg)
+  sink(stderr())
+  cat(mssg)
+  print(p)
+  sink()
+  quit(status = 1, save = "no")
+}
+
+if (length(selected) == 0) {
+  mssg <- c("Select one operation.\n",
+            str_c("--", ops, " "), "\n\n")
+  error(mssg)
+}
+
+if (length(selected) > 1) {
+  mssg <- c("Select only one operation.\n",
+            str_c("--", ops, " "), "\n\n")
+  error(mssg)
+}
+
+# Helpers ----
+
+symdiff <- function( x, y) { setdiff( union(x, y), intersect(x, y))}
+
