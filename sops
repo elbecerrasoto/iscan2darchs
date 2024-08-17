@@ -43,7 +43,7 @@ selected <- argl[ops] |>
 FILES <- argl$files
 OP <- names(selected)[1]
 
-# Check Args ----s
+# Check Args ----
 
 error <- function(mssg) {
   mssg <- str_flatten(mssg)
