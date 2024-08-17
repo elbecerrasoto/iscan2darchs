@@ -83,10 +83,11 @@ symdiff <- function(x, y) {
 }
 
 file2uvec <- function(ifile) {
-  read_file(ifile) |>
+  x <- read_file(ifile) |>
     str_split("\n") |>
     unlist() |>
     unique()
+  x[x != ""]
 }
 
 # Main ----
