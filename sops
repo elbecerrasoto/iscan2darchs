@@ -2,6 +2,9 @@
 
 library(argparser)
 library(stringr)
+library(readr)
+library(purrr)
+
 
 # Def Args ----
 
@@ -37,30 +40,82 @@ selected <- argl[ops] |>
   unlist() |>
   which()
 
+FILES <- argl$files
+OP <- names(selected)[1]
+
 # Check Args ----s
 
-error  <- function(mssg) {
+error <- function(mssg) {
   mssg <- str_flatten(mssg)
   sink(stderr())
-  cat(mssg)
+  cat(mssg, "\n", sep = "")
   print(p)
   sink()
   quit(status = 1, save = "no")
 }
 
+if (length(FILES) < 2) {
+  mssg <- "At least two files are needed.\n"
+  error(mssg)
+}
+
+
 if (length(selected) == 0) {
-  mssg <- c("Select one operation.\n",
-            str_c("--", ops, " "), "\n\n")
+  mssg <- c(
+    "Select one operation.\n",
+    str_c("--", ops, " "), "\n"
+  )
   error(mssg)
 }
 
 if (length(selected) > 1) {
-  mssg <- c("Select only one operation.\n",
-            str_c("--", ops, " "), "\n\n")
+  mssg <- c(
+    "Select only one operation.\n",
+    str_c("--", ops, " "), "\n\n"
+  )
   error(mssg)
 }
 
 # Helpers ----
 
-symdiff <- function( x, y) { setdiff( union(x, y), intersect(x, y))}
+symdiff <- function(x, y) {
+  setdiff(union(x, y), intersect(x, y))
+}
 
+file2uvec <- function(ifile) {
+  read_file(ifile) |>
+    str_split("\n") |>
+    unlist() |>
+    unique()
+}
+
+# Main ----
+
+SETS <- vector(mode = "list", length = length(FILES))
+names(SETS) <- FILES
+
+for (i in seq_along(FILES)) {
+  ifile <- FILES[[i]]
+  SETS[[i]] <- file2uvec(ifile)
+}
+
+
+if (OP == "diff") {
+  SETS |>
+    reduce(setdiff) |>
+    writeLines()
+} else if (OP == "symd") {
+  SETS |>
+    reduce(symdiff) |>
+    writeLines()
+} else if (OP == "union") {
+  SETS |>
+    reduce(union) |>
+    writeLines()
+} else if (OP == "inter") {
+  SETS |>
+    reduce(intersect) |>
+    writeLines()
+} else {
+  error("Unrecognized operation.\n")
+}
