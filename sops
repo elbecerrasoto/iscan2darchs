@@ -1,10 +1,11 @@
 #!/usr/bin/env Rscript
 
-library(argparser)
-library(stringr)
-library(readr)
-library(purrr)
-
+suppressPackageStartupMessages({
+  library(argparser)
+  library(stringr)
+  library(readr)
+  library(purrr)
+})
 
 # Def Args ----
 
@@ -42,6 +43,7 @@ selected <- argl[ops] |>
 
 FILES <- argl$files
 OP <- names(selected)[1]
+
 
 # Check Args ----
 
