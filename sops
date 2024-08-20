@@ -35,7 +35,7 @@ p <- p |>
   )
 
 
-argl <- parse_args(p)
+argl <- parse_args(p, argv = commandArgs(trailingOnly = TRUES))
 ops <- c("diff", "symd", "union", "inter")
 selected <- argl[ops] |>
   unlist() |>
