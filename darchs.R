@@ -69,10 +69,7 @@ standarize <- function(x) {
   (x - mean_x) / sd_x
 }
 
-archs |>
-  distinct(pid, length) |>
-  right_join(archs_pid) |>
-  mutate(slength = standarize(length))
+
 
 
 
@@ -115,4 +112,23 @@ replace_to_oneletter <- function(archs, code) {
   str_replace_all(archs, ",", "")
 }
 
-replace_to_oneletter(archs_pid$arch, ONE_LETTER)
+
+archs_pid <- archs |>
+  distinct(pid, length) |>
+  right_join(archs_pid) |>
+  mutate(slength = standarize(length))
+
+archs_pid <- archs_pid |>
+  mutate(arch_code = replace_to_oneletter(arch, ONE_LETTER))
+
+lxg <- "PF04740"
+deam <- "PF14431"
+endo <- "PF04493"
+
+
+bad <- archs_pid |>
+  filter(!str_detect(arch, endo) & !str_detect(arch, deam))
+
+good <- archs_pid |>
+  filter(str_detect(arch, endo) |
+    (str_detect(arch, lxg) & str_detect(arch, deam)))
