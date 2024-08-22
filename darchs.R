@@ -61,15 +61,11 @@ archs_pid <- Larchs |>
   )) |>
   do.call(bind_rows, args = _)
 
-rnorm(n = 10)
-
 standarize <- function(x) {
   mean_x <- mean(x)
   sd_x <- sd(x)
   (x - mean_x) / sd_x
 }
-
-
 
 
 
@@ -134,8 +130,10 @@ good <- archs_pid |>
     (str_detect(arch, lxg) & str_detect(arch, deam)))
 
 good <- good |>
-  mutate(slength2 = standarize(length),
-         deam = str_detect(arch_code, "å"))
+  mutate(
+    slength2 = standarize(length),
+    deam = str_detect(arch_code, "å")
+  )
 
 good <- good |>
   group_by(deam) |>
@@ -144,11 +142,9 @@ good <- good |>
 
 good <- good |>
   select(-slength, -slength2) |>
-  rename( slength = slength_deam)
+  rename(slength = slength_deam)
 
-view(good)
 
-gen_type()
 
 x <- archs_pid$arch
 Bdeam <- str_detect(x, deam)
@@ -166,8 +162,6 @@ type_pid <- case_when(
 archs_pid <- archs_pid |>
   mutate(type = type_pid)
 
-archs_pid |>
-  left_join(a)
 
 blasts <- read_tsv("blasts.tsv")
 names(blasts)
@@ -194,7 +188,8 @@ names(lev) <- archs_pid$pid
 
 lev <- lev |>
   mutate(
-    pid = archs_pid$pid) |>
+    pid = archs_pid$pid
+  ) |>
   relocate(pid)
 
 slev <- lev |>
@@ -204,37 +199,8 @@ slev <- slev |>
   mutate(
     slegth = archs_pid$slength,
     sbitscore = archs_pid$sbitscore,
-    type = archs_pid$type) |>
+    type = archs_pid$type
+  ) |>
   relocate(pid, type)
 
-# https://www.r-bloggers.com/2019/05/quick-and-easy-t-sne-analysis-in-r/
-library(M3C)
-
-sub_num <- slev |>
-  map_lgl(is.numeric)
-slev_numeric <- slev[sub_num]
-
-tsne(slev_numeric, labels=as.factor(slev$type))
-
-# https://datavizpyr.com/how-to-make-tsne-plot-in-r/
-library(Rtsne)
-theme_set(theme_bw(18))
-set.seed(142)
-
-tSNE_fit <- Rtsne(slev_numeric)
-
-tSNE_df <- tSNE_fit$Y %>%
-  as.data.frame() %>%
-  rename(tSNE1="V1",
-         tSNE2="V2") %>%
-  mutate(ID=row_number())
-
-p <- tSNE_df %>%
-  ggplot(aes(x = tSNE1,
-             y = tSNE2,
-             color = type
-  geom_point(alpha = 1/3)+
-  theme(legend.position="bottom")+
-  title("tSNE Bacillota Blast YwqJ, YwqL")
-p
-ggsave(p, "tSNE_proteins_bacillota.svg")
+# write_tsv(slev, "slev.tsv")
